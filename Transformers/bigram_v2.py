@@ -65,11 +65,14 @@ class BigramLanguageModel(nn.Module):
         super().__init__()
         # Each token is embedded into a size of number of vocab letters
         self.token_embedding_table = nn.Embedding(vocab_size, embd_size)
-        self.positional
+        self.positional_embedding_table = nn.Embedding(block_size, embd_size)
+        self.embd_head = nn.Linear(embd_size, vocab_size)
 
     def forward(self, idx, targets=None):
         # idx and target both of dimensions (B, T) where B is batch size and T is time / token dimension
-        preds = self.token_embedding_table(idx) # (B, T, C)
+        token_embd = self.token_embedding_table(idx)
+        pos_embd = self.positional_embedding_table(torch.arange(T, device=device)) # (B, T, C_embd)
+        preds = self.embd_head(token_embd + pos_embd) # (B, T, vocab_size)
 
         if targets == None:
             loss = None
